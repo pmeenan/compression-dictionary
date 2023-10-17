@@ -86,22 +86,41 @@ if (is_file("info.json")) {
           $original = $entry['comp']['original'];
           $o = number_format($original);
           $schemes = array(
+            'Gzip' => 'gzip',
             'Brotli' => 'br',
             'Zstandard' => 'zstd'
           );
+          if (isset($entry['comp']['gzip']['9']) && isset($entry['comp']['zstd-d']['3'])) {
+            $gz = $entry['comp']['gzip']['9'];
+            $zstd = $entry['comp']['zstd-d']['3'];
+            $rel = number_format((floatval($zstd) / floatval($gz)) * 100.0, 0);
+            echo "<p>Zstandard level 3 with a dictionary is $rel% the size of gzip 9.</p>";
+          }
+          if (isset($entry['comp']['gzip']['9']) && isset($entry['comp']['zstd-d']['10'])) {
+            $gz = $entry['comp']['gzip']['9'];
+            $zstd = $entry['comp']['zstd-d']['10'];
+            $rel = number_format((floatval($zstd) / floatval($gz)) * 100.0, 0);
+            echo "<p>Zstandard level 10 with a dictionary is $rel% the size of gzip 9.</p>";
+          }
           foreach ($schemes as $scheme => $key) {
             echo "<h3>$scheme Compression</h3>\n<table>\n";
             echo "<tr><th>Compression Level</th><th>Original Size</th><th>Compressed</th><th>Relative Size</th><th>With Dictionary</th><th>Relative to Original</th><th>Relative to Compressed</th></tr>\n";
             for ($level = 1; $level <= 19; $level++) {
-              if ($original > 0 && isset($entry['comp']["$key"]["$level"]) && isset($entry['comp']["$key-d"]["$level"])) {
+              if ($original > 0 && isset($entry['comp']["$key"]["$level"])) {
                 $comp = $entry['comp']["$key"]["$level"];
-                $dict = $entry['comp']["$key-d"]["$level"];
                 $comp_relative = intval(round((floatval($comp) / floatval($original)) * 100.0));
-                $dict_relative = intval(round((floatval($dict) / floatval($original)) * 100.0));
-                $comp_dict = intval(round((floatval($dict) / floatval($comp)) * 100.0));
-                $comp_dict_r = 100 - $comp_dict;
+                $dict = 'N/A';
+                $dict_relative = 'N/A';
+                $comp_dict = 'N/A';
+                $comp_dict_r = 'N/A';
+                if (isset($entry['comp']["$key-d"]["$level"])) {
+                  $dict = $entry['comp']["$key-d"]["$level"];
+                  $dict_relative = intval(round((floatval($dict) / floatval($original)) * 100.0));
+                  $comp_dict = intval(round((floatval($dict) / floatval($comp)) * 100.0));
+                  $comp_dict_r = 100 - $comp_dict;
+                  $dict = number_format($dict);
+                }
                 $comp = number_format($comp);
-                $dict = number_format($dict);
                 echo("<tr><td>$scheme $level</td><td>$o</td><td>$comp</td><td>$comp_relative%</td><td>$dict</td><td>$dict_relative%</td><td>$comp_dict% ($comp_dict_r% smaller)</td></tr>\n");
               }
             }

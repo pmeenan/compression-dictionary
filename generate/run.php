@@ -79,7 +79,8 @@ function FetchUrls() {
           $ch = curl_init($url);
           $ua = isset($info['ua']) ? $info['ua'] : $_SERVER['HTTP_USER_AGENT'];
           $headers = array(
-            "User-Agent: $ua"
+            "User-Agent: $ua",
+            "Sec-Fetch-Dest: document"
           );
           curl_setopt($ch, CURLOPT_TIMEOUT, 600);
           curl_setopt($ch, CURLOPT_FAILONERROR, true);
@@ -185,11 +186,25 @@ function TestCompression() {
       if (is_file($body) && is_file($dict)) {
         $comp = array(
           'original' => filesize($body),
+          'gzip' => array(),
           'br' => array(),
           'br-d' => array(),
           'zstd' => array(),
           'zstd-d' => array()
         );
+        $levels = array(1, 5, 9);
+        foreach ($levels as $level) {
+          $output = null;
+          $result = null;
+          $tmp = "tmp.dat";
+          if (is_file($tmp)) {unlink($tmp);}
+          if (exec("gzip -k -$level -c $body > $tmp", $output, $result) === false || $result !== 0) {
+            $error = "Error gzip compressing body";
+            break 2;
+          }
+          $comp['gzip']["$level"] = filesize($tmp);
+          if (is_file($tmp)) {unlink($tmp);}
+        }
         $levels = array(1, 5, 11);
         foreach ($levels as $level) {
           $output = null;

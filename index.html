@@ -19,11 +19,22 @@
         showing the impact of using dictionary-based compression.
     </p>
     <p>The HTTP protocol-level parts of the compression dictionary is being developed through the IETF. The current
-      Internet Draft (pre-RFC) is <a href="https://datatracker.ietf.org/doc/draft-meenan-httpbis-compression-dictionary/">here</a>.
+      Internet Draft (pre-RFC) is <a href="https://datatracker.ietf.org/doc/draft-ietf-httpbis-compression-dictionary/">here</a>.
     </p>
     <h2>Tools</h2>
     <ul>
       <li><a href="generate/">Dictionary Generator</a> - Generate and test the effectiveness of compression dictionaries given a list of URLs.</li>
+      <li><a href="static/">Delta Compression Tester</a> - Test the effectiveness of compressing a new version of a resource using a previous version as a dictionary.</li>
     </ul>
+    <h2>Documentation</h2>
+    <ul>
+      <li><a href="https://github.com/WICG/compression-dictionary-transport">WICG Explainer</a></li>
+      <li><a href="https://datatracker.ietf.org/doc/draft-ietf-httpbis-compression-dictionary/">IETF Internet Draft</a></li>
+      <li><a href="">performance.now() 2023 conference presentation (coming soon)</a></li>
+    </ul>
+    <h2>Browser Status</h2>
+    <p>Compression Dictionary Transport is available in Chrome 119 or later as an origin trial while the Header values go through the standards process.
+      You can register for the origin trial <a href="https://developer.chrome.com/origintrials/#/view_trial/2583940286203822081">here</a>.
+    </p>
   </body>
 </html>

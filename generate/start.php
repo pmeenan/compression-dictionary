@@ -50,7 +50,7 @@ if (!isset($error)) {
   }
   file_put_contents("$dir/info.json", json_encode($info));
   // Redirect to the processing page for the test
-  $processing = "https://{$_SERVER['HTTP_HOST']}" . dirname($_SERVER['PHP_SELF']) . "/process.php?id=$id";
+  $processing = "https://use-as-dictionary.com/generate/process.php?id=$id";
   header("Location: " . $processing);
   die();
 } else {

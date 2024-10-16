@@ -103,17 +103,33 @@ function TestCompression() {
       );
       $output = null;
       $result = null;
+      $levels = array(1, 3, 5, 7, 11);
       $tmp = "tmp.dat";
-      if (is_file($tmp)) {unlink($tmp);}
-      if (exec("brotli -q 11 -o $tmp $body", $output, $result) === false || $result !== 0) {
-        $error = "Error compressing body";
+      foreach ($levels as $level) {
+        if (is_file($tmp)) {unlink($tmp);}
+        if (exec("brotli -q $level -o $tmp $body", $output, $result) === false || $result !== 0) {
+          $error = "Error compressing body";
+        }
+        $comp['br'][strval($level)] = filesize($tmp);
+        if (is_file($tmp)) {unlink($tmp);}
+        if (exec("brotli -q $level -D $dict -o $tmp $body", $output, $result) === false || $result !== 0) {
+          $error = "Error dictionary-compressing body";
+        }
+        $comp['br-d'][strval($level)] = filesize($tmp);
       }
-      $comp['br'] = filesize($tmp);
-      if (is_file($tmp)) {unlink($tmp);}
-      if (exec("brotli -q 11 -D $dict -o $tmp $body", $output, $result) === false || $result !== 0) {
-        $error = "Error dictionary-compressing body";
+      $levels = array(1, 2, 3, 5, 7, 10, 19, 22);
+      foreach ($levels as $level) {
+        if (is_file($tmp)) {unlink($tmp);}
+        if (exec("zstd --ultra -$level --long $body -o $tmp", $output, $result) === false || $result !== 0) {
+          $error = "Error compressing body";
+        }
+        $comp['zstd'][strval($level)] = filesize($tmp);
+        if (is_file($tmp)) {unlink($tmp);}
+        if (exec("zstd --ultra -$level --long -D $dict $body -o $tmp", $output, $result) === false || $result !== 0) {
+          $error = "Error dictionary-compressing body";
+        }
+        $comp['zstd-d'][strval($level)] = filesize($tmp);
       }
-      $comp['br-d'] = filesize($tmp);
       if (is_file($tmp)) {unlink($tmp);}
       if (exec("gzip -k -9 -c $body > $tmp", $output, $result) === false || $result !== 0) {
         $error = "Error dictionary-compressing body";

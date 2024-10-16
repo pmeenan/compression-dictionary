@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Compression Dictionary Transport Test Page</title>
+    <link rel="shortcut icon"type="image/x-icon" href="data:image/x-icon;,">
+    <style>
+      body {
+        font-family: Arial, Helvetica, sans-serif;
+      }
+    </style>
+    <script src="test.js"></script>
+  </head>
+  <body>
+    <p>This page tests the browser and network path support for <a href="https://datatracker.ietf.org/doc/draft-ietf-httpbis-compression-dictionary/">Compression Dictionary Transport</a>.</p>
+    <p>Test Process:
+      <ul>
+        <li>Browser link tag supports rel="compression-dictionary": <span id="link"></span></li>
+        <li>Fetch a dictionary: <span id="fetch"></span></li>
+        <li>Fetch a resource that is Brotli-compressed with a dictionary (dcb): <span id="dcb"></span></li>
+        <li>Fetch a resource that is Zstandard-compressed with a dictionary (dcz): <span id="dcz"></span></li>
+      </ul>
+    </p>
+    <button id="button" onclick="RunTest()">Run Test</button>
+  </body>
+</html>

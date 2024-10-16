@@ -50,24 +50,27 @@ if (is_file("info.json")) {
     ?>
     <p>Then it used the old version of the resource as a dictionary when compressing the new version to see how much smaller an upgrade would be than downloading the whole thing.</p>
     <?php
-    if (isset($info['comp']) && is_array($info['comp']) && isset($info['comp']['original']) && isset($info['comp']['br']) && isset($info['comp']['br-d'])) {
+    if (isset($info['comp']) && is_array($info['comp']) &&
+        isset($info['comp']['original']) &&
+        isset($info['comp']['gzip']) &&
+        isset($info['comp']['br']['11']) && isset($info['comp']['br-d']['11']) &&
+        isset($info['comp']['zstd']['22']) && isset($info['comp']['zstd-d']['22'])) {
       $original = $info['comp']['original'];
       $o = number_format($original);
       if ($original > 0) {
-        $br = $info['comp']['br'];
-        $sbr = $info['comp']['br-d'];
-        $gzip = $info['comp']['gzip'];
-        $g = number_format($gzip);
-        $br_relative = 100 - intval(round((floatval($br) / floatval($original)) * 100.0));
-        $sbr_relative = 100 - intval(round((floatval($sbr) / floatval($original)) * 100.0));
-        $br_sbr = intval(round((floatval($sbr) / floatval($br)) * 100.0));
-        $br_sbr_r = 100 - $br_sbr;
-        $br = number_format($br);
-        $sbr = number_format($sbr);
+        $g = number_format($info['comp']['gzip']);
         echo "<p>Uncompressed: <b>$o</b></p>";
         echo "<p>Gzip 9: <b>$g</b></p>";
-        echo "<p>Brotli 11: <b>$br</b> ($br_relative% smaller than uncompressed)</p>";
-        echo "<p>Brotli 11 with dictionary: <b>$sbr</b> ($sbr_relative% smaller than uncompressed, $br_sbr_r% smaller than Brotli 11 alone)</p>";
+        foreach($info['comp']['br'] as $level => $value) {
+          $br = number_format($info['comp']['br'][$level]);
+          $brd = number_format($info['comp']['br-d'][$level]);
+          echo "<p>Brotli $level: <b>$br</b> - with dictionary: <b>$brd</b></p>";
+        }
+        foreach($info['comp']['zstd'] as $level => $value) {
+          $br = number_format($info['comp']['zstd'][$level]);
+          $brd = number_format($info['comp']['zstd-d'][$level]);
+          echo "<p>Zstandard $level: <b>$br</b> - with dictionary: <b>$brd</b></p>";
+        }
       } else {
         echo("<p>Error: zero-length file.</p>\n");
       }

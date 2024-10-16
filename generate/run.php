@@ -224,7 +224,7 @@ function TestCompression() {
           $comp['br-d']["$level"] = filesize($tmp);
           if (is_file($tmp)) {unlink($tmp);}
         }
-        $levels = array(1, 2, 3, 10, 19);
+        $levels = array(1, 2, 3, 10, 19, 22);
         foreach ($levels as $level) {
           $output = null;
           $result = null;

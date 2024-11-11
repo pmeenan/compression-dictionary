@@ -11,7 +11,7 @@ if (is_file("info.json")) {
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Shared Brotli Dynamic Dictionary Tester - Result</title>
+    <title>Compression Dictionary Transport Dynamic Dictionary Tester - Result</title>
     <style>
       body {
         font-family: Arial, Helvetica, sans-serif;
@@ -86,7 +86,7 @@ if (is_file("info.json")) {
           $original = $entry['comp']['original'];
           $o = number_format($original);
           $schemes = array(
-            'Gzip' => 'gzip',
+            //'Gzip' => 'gzip',
             'Brotli' => 'br',
             'Zstandard' => 'zstd'
           );
@@ -105,7 +105,7 @@ if (is_file("info.json")) {
           foreach ($schemes as $scheme => $key) {
             echo "<h3>$scheme Compression</h3>\n<table>\n";
             echo "<tr><th>Compression Level</th><th>Original Size</th><th>Compressed</th><th>Relative Size</th><th>With Dictionary</th><th>Relative to Original</th><th>Relative to Compressed</th></tr>\n";
-            for ($level = 1; $level <= 19; $level++) {
+            for ($level = 1; $level <= 22; $level++) {
               if ($original > 0 && isset($entry['comp']["$key"]["$level"])) {
                 $comp = $entry['comp']["$key"]["$level"];
                 $comp_relative = intval(round((floatval($comp) / floatval($original)) * 100.0));

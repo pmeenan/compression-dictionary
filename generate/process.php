@@ -14,7 +14,7 @@ if (isset($info) && is_array($info) && isset($info['done']) && $info['done']) {
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Shared Brotli Dynamic Dictionary Tester - Error</title>
+    <title>Compression Dictionary Transport Dynamic Dictionary Tester - Error</title>
     <style>
       body {
         font-family: Arial, Helvetica, sans-serif;

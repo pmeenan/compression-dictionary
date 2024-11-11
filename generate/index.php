@@ -32,6 +32,10 @@
         <label for="test"> Test compression effectiveness after generating dictionary (will test only the first 20 URLs)</label><br>
       </p>
       <p>
+        <input type="checkbox" id="slow" name="slow" value="1">
+        <label for="slow"> Rate-limit the fetches to one every sew seconds to reduce the risk of being blocked.</label><br>
+      </p>
+      <p>
         <label for="size">Dictionary Size (in KB):</label>
         <input type="number" id="size" name="size" min="4" max="4096" value="1024">
       </p>

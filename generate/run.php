@@ -70,37 +70,66 @@ function FetchUrls() {
   global $end_time;
   if (isset($status) || isset($error)) { return; }
   foreach ($info['results'] as $i => $entry) {
-    if (!isset($entry['body'])) {
-      $file = "$dir/$i-body.dat";
-      if (!is_file($file)) {
-        $url = $entry['url'];
-        $fp = fopen($file, 'w+');
-        if ($fp) {
-          $ch = curl_init($url);
-          $ua = isset($info['ua']) ? $info['ua'] : $_SERVER['HTTP_USER_AGENT'];
-          $headers = array(
-            "User-Agent: $ua",
-            "Sec-Fetch-Dest: document"
-          );
-          curl_setopt($ch, CURLOPT_TIMEOUT, 600);
-          curl_setopt($ch, CURLOPT_FAILONERROR, true);
-          curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-          curl_setopt($ch, CURLOPT_ENCODING , '');
-          curl_setopt($ch, CURLOPT_FILE, $fp);
-          curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-          if (curl_exec($ch) === false) {
-            $error = "Error fetching $url";
+    $attempt = 0;
+    do {
+      $needs_retry = false;
+      $attempt++;
+      if (!isset($entry['body'])) {
+        $file = "$dir/$i-body.dat";
+        if (!is_file($file)) {
+          $url = $entry['url'];
+          $fp = fopen($file, 'w+');
+          if ($fp) {
+            $ch = curl_init($url);
+            $ua = isset($info['ua']) ? $info['ua'] : $_SERVER['HTTP_USER_AGENT'];
+            $headers = array(
+              "User-Agent: $ua",
+              "Sec-Fetch-Dest: document",
+              "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+              "Accept-Language: en-US,en;q=0.9",
+              "Priority: u=0, i",
+              "Sec-Fetch-Dest: document",
+              "Sec-Fetch-Mode: navigate",
+              "Sec-Fetch-Site: none",
+              "Sec-Fetch-User: ?1",
+              "upgrade-insecure-requests: 1"
+            );
+            if (isset($_SERVER['HTTP_SEC_CH_UA'])) $headers[] = "Sec-Ch-Ua: {$_SERVER['HTTP_SEC_CH_UA']}";
+            if (isset($_SERVER['HTTP_SEC_CH_UA_MOBILE'])) $headers[] = "Sec-Ch-Ua-Mobile: {$_SERVER['HTTP_SEC_CH_UA_MOBILE']}";
+            if (isset($_SERVER['HTTP_SEC_CH_UA_PLATFORM'])) $headers[] = "Sec-Ch-Ua-Platform: {$_SERVER['HTTP_SEC_CH_UA_PLATFORM']}";
+            curl_setopt($ch, CURLOPT_TIMEOUT, 600);
+            curl_setopt($ch, CURLOPT_FAILONERROR, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+            curl_setopt($ch, CURLOPT_ENCODING , '');
+            curl_setopt($ch, CURLOPT_FILE, $fp);
+            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+            if (curl_exec($ch) === false) {
+              if ($attempt <= 3) {
+                $needs_retry = true;
+              }
+            }
+            curl_close($ch);
+            fclose($fp);
+            if (file_exists($file) && !filesize($file)) {
+              unlink($file);
+              if (!$needs_retry && $attempt <= 3) {
+                $needs_retry = true;
+              }
+            }
+            if (isset($info['slow']) && $info['slow']) {
+              sleep(rand(1,3));
+            }
           }
-          curl_close($ch);
-          fclose($fp);
         }
-      }
-      $info['results'][$i]['body'] = $file;
-      $count = count($info['results']);
-      $index = $i + 1;
-      $status = "Downloaded $index of $count URLs...";
-      if (time() > $end_time) { return; }
-    }
+        if (!$needs_retry) {
+          $info['results'][$i]['body'] = $file;
+          $count = count($info['results']);
+          $index = $i + 1;
+          $status = "Downloaded $index of $count URLs...";
+        }
+      } 
+    } while ($needs_retry);
+    if (time() > $end_time) { return; }
   }
 }
 
@@ -153,14 +182,16 @@ function CreateTestDictionaries() {
       if (!is_file($dict)) {
         $body = "$i-body.dat";
         // Rename the body that we are using so it isn't included in the dictionary
-        rename($body, "$body.tmp");
-        $command = "dictionary_generator --target_dict_len=$size $dict *-body.dat";
-        $output = null;
-        $result = null;
-        if (exec($command, $output, $result) === false || $result !== 0) {
-          $error = "Error creating dictionary";
+        if (file_exists($body)) {
+          rename($body, "$body.tmp");
+          $command = "dictionary_generator --target_dict_len=$size $dict *-body.dat";
+          $output = null;
+          $result = null;
+          if (exec($command, $output, $result) === false || $result !== 0) {
+            $error = "Error creating dictionary";
+          }
+          rename("$body.tmp", $body);
         }
-        rename("$body.tmp", $body);
       }
       $info['results'][$i]['dict'] = $dict;
       $count = count($info['results']);
@@ -224,7 +255,7 @@ function TestCompression() {
           $comp['br-d']["$level"] = filesize($tmp);
           if (is_file($tmp)) {unlink($tmp);}
         }
-        $levels = array(1, 2, 3, 10, 19, 22);
+        $levels = array(3, 10, 22);
         foreach ($levels as $level) {
           $output = null;
           $result = null;
@@ -247,8 +278,6 @@ function TestCompression() {
         $count = count($info['results']);
         $index = $i + 1;
         $status = "Tested dictionary compression effectiveness on $index of $count pages...";
-      } else {
-        $error = "Missing body or dictionary";
       }
       if (time() > $end_time) { return; }
     }

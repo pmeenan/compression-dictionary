@@ -45,9 +45,8 @@ if (!isset($error)) {
   if (isset($_REQUEST['ua'])) {
     $info['ua'] = $_REQUEST['ua'];
   }
-  if (isset($_REQUEST['test']) && $_REQUEST['test'] === "1") {
-    $info['test'] = true;
-  }
+  $info['test'] = (isset($_REQUEST['test']) && $_REQUEST['test'] === "1");
+  $info['slow'] = (isset($_REQUEST['slow']) && $_REQUEST['slow'] === "1");
   file_put_contents("$dir/info.json", json_encode($info));
   // Redirect to the processing page for the test
   $processing = "https://use-as-dictionary.com/generate/process.php?id=$id";
